@@ -1,0 +1,33 @@
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <button class="back-btn" onclick="window.location.href='home.html'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <img src="medwaytran.png" alt="MedWay Logo" class="logo">
+        </div>
+
+        <div class="search-container">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search hospitals..." id="searchInput">
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="list-container" id="hospitalList">
+            </div>
+
+            <button class="back-to-hospitals" id="backToHospitals">
+                <i class="fas fa-arrow-left"></i> Back to hospital list
+            </button>
+            
+            <div class="service-container" id="serviceList">
+                <div class="service-header">
+                    <h2 id="selectedHospitalName">Hospital Services</h2>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
