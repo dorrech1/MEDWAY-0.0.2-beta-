@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedWay - Appointments</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --primary: #2A7886;
+            --primary-light: #60A3B0;
+            --secondary: #31AD70;
+            --secondary-light: #80CEA4;
+            --accent: #FFCC33;
+            --background: #F2F9FF;
+            --card-bg: #FFFFFF;
+            --text-dark: #2C3E50;
+            --text-light: #FFFFFF;
+            --danger: #E74C3C;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --muted: #95A5A6;
+            --success: #27AE60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(170deg, var(--primary-light) 0%, var(--background) 25%);
+            z-index: -1;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 420px;
+            background: transparent;
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .app-header {
+            padding: 24px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .back-btn {
+            background: var(--card-bg);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .back-btn i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .page-title {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .notification-btn {
+            background: var(--card-bg);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .notification-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .notification-btn i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 10px 20px 30px;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 5px;
+            box-shadow: 0 3px 10px var(--shadow);
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+        }
+
+        .tab.active {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: var(--text-light);
+            box-shadow: 0 3px 8px rgba(42, 120, 134, 0.3);
+        }
+
+        /* Calendar View */
+        .calendar-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 6px 16px var(--shadow);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+        }
+
+        .month-nav-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--primary);
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .month-nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .current-month {
+            font-weight: 600;
+            font-size: 16px;
+            margin: 0 12px;
+        }
+
+        .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(36px, 1fr)); 
+        }
+
+        .day-name {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .date {
+        width: 100%; 
+        height: auto; 
+        aspect-ratio: 1/1; 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: calc(14px + 0.5vw); 
+        transition: all 0.2s ease;
+        position: relative;
+}
+
+        .date:hover {
+            background-color: rgba(42, 120, 134, 0.1);
+        }
+
+        .date.today {
+            background-color: var(--accent);
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .date.active {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .date.has-appointment::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 4px;
+            height: 4px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+        }
+
+        .date.other-month {
+            color: var(--muted);
+        }
+
+        .time-slots-container {
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .section-title i {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .time-slot {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 3px 10px var(--shadow);
+            transition: all 0.3s ease;
+            font-size: 14px;
+            border: 2px solid transparent;
+        }
+
+        .time-slot:hover {
+            transform: translateY(-3px);
+        }
+
+        .time-slot.available {
+            border-color: var(--secondary-light);
+        }
+
+        .time-slot.selected {
+            background: linear-gradient(90deg, var(--primary-light), var(--secondary-light));
+            color: var(--text-light);
+            border-color: transparent;
+        }
+
+        .time-slot.booked {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--muted);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .time-slot.booked:hover {
+            transform: none;
+        }
+
+        .appointment-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: 0 6px 16px var(--shadow);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .appointment-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .appointment-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+        }
+
+        .appointment-card.upcoming::before {
+            background-color: var(--secondary);
+        }
+
+        .appointment-card.completed::before {
+            background-color: var(--muted);
+        }
+
+        .appointment-card.missed::before {
+            background-color: var(--danger);
+        }
+
+        .appointment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .doctor-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+            border: 2px solid var(--primary-light);
+        }
+
+        .appointment-info {
+            flex: 1;
+        }
+
+        .doctor-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--primary);
+        }
+
+        .doctor-specialty {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .appointment-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .appointment-status.upcoming {
+            background-color: rgba(49, 173, 112, 0.15);
+            color: var(--secondary);
+        }
+
+        .appointment-status.completed {
+            background-color: rgba(149, 165, 166, 0.15);
+            color: var(--muted);
+        }
+
+        .appointment-status.missed {
+            background-color: rgba(231, 76, 60, 0.15);
+            color: var(--danger);
+        }
+
+        .appointment-details {
+            display: flex;
+            margin: 5px 0 15px;
+        }
+
+        .detail-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 0 10px;
+        }
+
+        .detail-item:first-child {
+            padding-left: 0;
+        }
+
+        .detail-item:last-child {
+            border-right: none;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 2px;
+        }
+
+        .detail-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .appointment-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            background: none;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            color: var(--text-light);
+            box-shadow: 0 3px 8px rgba(42, 120, 134, 0.3);
+        }
+
+        .action-btn.secondary {
+            background-color: rgba(42, 120, 134, 0.1);
+            color: var(--primary);
+        }
+
+        .action-btn.danger {
+            background-color: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(42, 120, 134, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            z-index: 100;
+        }
+
+        .add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(42, 120, 134, 0.5);
+        }
+
+        /* No Appointments */
+        .no-appointments {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 6px 16px var(--shadow);
+        }
+
+        .no-appointments i {
+            font-size: 48px;
+            color: var(--primary-light);
+            margin-bottom: 15px;
+        }
+
+        .no-appointments h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+
+        .no-appointments p {
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .book-btn {
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            color: var(--text-light);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(42, 120, 134, 0.3);
+            transition: all 0.3s ease;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .book-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(42, 120, 134, 0.4);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+            
+            .time-slots {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <button class="back-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="page-title">Appointments</div>
+            <button class="notification-btn">
+                <i class="fas fa-bell"></i>
+            </button>
+        </div>
+
+        <div class="content">
+            <div class="tabs">
+                <div class="tab active" data-tab="upcoming">Upcoming</div>
+                <div class="tab" data-tab="book">Book New</div>
+                <div class="tab" data-tab="history">History</div>
+            </div>
+
+            <div class="tab-content active" id="upcoming-tab">
+                <div class="appointment-card upcoming">
+                    <div class="appointment-header">
+                        <img src="/api/placeholder/100/100" alt="Dr. Michael Chen" class="doctor-avatar">
+                        <div class="appointment-info">
+                            <div class="doctor-name">Dr. Michael Chen</div>
+                            <div class="doctor-specialty">Cardiologist</div>
+                        </div>
+                        <span class="appointment-status upcoming">Upcoming</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value">Mar 10, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time</span>
+                            <span class="detail-value">10:30 AM</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Check-up</span>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="action-btn primary">
+                            <i class="fas fa-video"></i> Join Call
+                        </button>
+                        <button class="action-btn danger">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <div class="appointment-card upcoming">
+                    <div class="appointment-header">
+                        <img src="/api/placeholder/100/100" alt="Dr. Emily Wilson" class="doctor-avatar">
+                        <div class="appointment-info">
+                            <div class="doctor-name">Dr. Emily Wilson</div>
+                            <div class="doctor-specialty">Dermatologist</div>
+                        </div>
+                        <span class="appointment-status upcoming">Upcoming</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value">Mar 15, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time</span>
+                            <span class="detail-value">2:45 PM</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Follow-up</span>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="action-btn secondary">
+                            <i class="fas fa-calendar-day"></i> Reschedule
+                        </button>
+                        <button class="action-btn danger">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="book-tab">
+                <div class="calendar-container">
+                    <div class="calendar-header">
+                        <div class="month-nav">
+                            <button class="month-nav-btn" id="prevMonth">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span class="current-month">March 2025</span>
+                            <button class="month-nav-btn" id="nextMonth">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="day-name">Sun</div>
+                        <div class="day-name">Mon</div>
+                        <div class="day-name">Tue</div>
+                        <div class="day-name">Wed</div>
+                        <div class="day-name">Thu</div>
+                        <div class="day-name">Fri</div>
+                        <div class="day-name">Sat</div>
+                        <div class="date other-month">25</div>
+                        <div class="date other-month">26</div>
+                        <div class="date other-month">27</div>
+                        <div class="date other-month">28</div>
+                        <div class="date">1</div>
+                        <div class="date">2</div>
+                        <div class="date">3</div>
+                        <div class="date">4</div>
+                        <div class="date">5</div>
+                        <div class="date">6</div>
+                        <div class="date today">7</div>
+                        <div class="date has-appointment">8</div>
+                        <div class="date">9</div>
+                        <div class="date">10</div>
+                        <div class="date has-appointment">11</div>
+                        <div class="date">12</div>
+                        <div class="date">13</div>
+                        <div class="date">14</div>
+                        <div class="date active">15</div>
+                        <div class="date">16</div>
+                        <div class="date">17</div>
+                        <div class="date">18</div>
+                        <div class="date">19</div>
+                        <div class="date">20</div>
+                        <div class="date has-appointment">21</div>
+                        <div class="date">22</div>
+                        <div class="date">23</div>
+                        <div class="date">24</div>
+                        <div class="date">25</div>
+                        <div class="date">26</div>
+                        <div class="date">27</div>
+                        <div class="date">28</div>
+                        <div class="date">29</div>
+                        <div class="date">30</div>
+                        <div class="date">31</div>
+                        <div class="date other-month">1</div>
+                        <div class="date other-month">2</div>
+                        <div class="date other-month">3</div>
+                        <div class="date other-month">4</div>
+                    </div>
+                </div>
+                <div class="time-slots-container">
+                    <div class="section-title">
+                        <i class="far fa-clock"></i> Available Time Slots
+                    </div>
+                    <div class="time-slots">
+                        <div class="time-slot booked">8:00 AM</div>
+                        <div class="time-slot booked">9:00 AM</div>
+                        <div class="time-slot available">10:00 AM</div>
+                        <div class="time-slot available">11:00 AM</div>
+                        <div class="time-slot booked">12:00 PM</div>
+                        <div class="time-slot selected">1:00 PM</div>
+                        <div class="time-slot available">2:00 PM</div>
+                        <div class="time-slot available">3:00 PM</div>
+                        <div class="time-slot booked">4:00 PM</div>
+                    </div>
+                </div>
+
+                <button class="book-btn">
+                    <i class="fas fa-calendar-check"></i> Book Appointment
+                </button>
+            </div>
+            <div class="tab-content" id="history-tab">
+                <div class="appointment-card completed">
+                    <div class="appointment-header">
+                        <img src="/api/placeholder/100/100" alt="Dr. Robert Adams" class="doctor-avatar">
+                        <div class="appointment-info">
+                            <div class="doctor-name">Dr. Robert Adams</div>
+                            <div class="doctor-specialty">General Physician</div>
+                        </div>
+                        <span class="appointment-status completed">Completed</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value">Feb 25, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time</span>
+                            <span class="detail-value">3:15 PM</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Check-up</span>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="action-btn primary">
+                            <i class="fas fa-file-medical"></i> View Report
+                        </button>
+                        <button class="action-btn secondary">
+                            <i class="fas fa-redo"></i> Book Again
+                        </button>
+                    </div>
+                </div>
+
+                <div class="appointment-card missed">
+                    <div class="appointment-header">
+                        <img src="/api/placeholder/100/100" alt="Dr. Sarah Lopez" class="doctor-avatar">
+                        <div class="appointment-info">
+                            <div class="doctor-name">Dr. Sarah Lopez</div>
+                            <div class="doctor-specialty">Neurologist</div>
+                        </div>
+                        <span class="appointment-status missed">Missed</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value">Feb 18, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time</span>
+                            <span class="detail-value">11:00 AM</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Consultation</span>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="action-btn primary">
+                            <i class="fas fa-redo"></i> Reschedule
+                        </button>
+                    </div>
+                </div>
+
+                <div class="appointment-card completed">
+                    <div class="appointment-header">
+                        <img src="/api/placeholder/100/100" alt="Dr. Michael Chen" class="doctor-avatar">
+                        <div class="appointment-info">
+                            <div class="doctor-name">Dr. Michael Chen</div>
+                            <div class="doctor-specialty">Cardiologist</div>
+                        </div>
+                        <span class="appointment-status completed">Completed</span>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="detail-item">
+                            <span class="detail-label">Date</span>
+                            <span class="detail-value">Feb 10, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Time</span>
+                            <span class="detail-value">9:45 AM</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Type</span>
+                            <span class="detail-value">Follow-up</span>
+                        </div>
+                    </div>
+                    <div class="appointment-actions">
+                        <button class="action-btn primary">
+                            <i class="fas fa-file-medical"></i> View Report
+                        </button>
+                        <button class="action-btn secondary">
+                            <i class="fas fa-redo"></i> Book Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="add-btn" id="addBtn">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <script>
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const target = this.getAttribute('data-tab');
+                
+                tabs.forEach(tab => tab.classList.remove('active'));
+                this.classList.add('active');
+                
+                tabContents.forEach(content => content.classList.remove('active'));
+                document.getElementById(`${target}-tab`).classList.add('active');
+                
+                document.getElementById(`${target}-tab`).classList.add('fadeIn');
+                setTimeout(() => {
+                    document.getElementById(`${target}-tab`).classList.remove('fadeIn');
+                }, 500);
+            });
+        });
+
+        const dates = document.querySelectorAll('.date:not(.other-month)');
+        dates.forEach(date => {
+            date.addEventListener('click', function() {
+                dates.forEach(d => d.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        const timeSlots = document.querySelectorAll('.time-slot:not(.booked)');
+        timeSlots.forEach(slot => {
+            slot.addEventListener('click', function() {
+                timeSlots.forEach(s => s.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = 'home.html';
+        });
+
+   
+        document.getElementById('addBtn').addEventListener('click', () => {
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.querySelector('[data-tab="book"]').classList.add('active');
+            
+            tabContents.forEach(content => content.classList.remove('active'));
+            document.getElementById('book-tab').classList.add('active');
+            document.getElementById('book-tab').classList.add('fadeIn');
+        });
+
+        let currentMonth = new Date();
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            updateCalendar(currentMonth);
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            updateCalendar(currentMonth);
+        });
+
+        function updateCalendar(date) {
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            
+            document.querySelector('.current-month').textContent = 
+                `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+            
+        }
+    </script>
+</body>
+
+</html>
